@@ -1,42 +1,55 @@
 version: "3"
 services:
   reverseproxy:
-      image: reverseproxy
-      ports:
-          - 8080:8080
-      restart: always
-      depends_on:
-        - backend-user
-        - backend-feed
+    image: reverseproxy
+    ports:
+      - 8080:8080
+    restart: always
+    depends_on:
+      - backend-user
+      - backend-feed
+    networks:
+      - example-net
   backend-user:
     image: udagram-api-user
+    volumes:
+      - $HOME/.aws:/root/.aws
     environment:
       ALX_POSTGRES_USERNAME: $ALX_POSTGRES_USERNAME
-      ALX_POSTGRES_PASSWORD: $ALX_POSTGRES_PASSWORD 
+      ALX_POSTGRES_PASSWORD: $ALX_POSTGRES_PASSWORD
       ALX_POSTGRES_DB: $ALX_POSTGRES_DB
       ALX_POSTGRES_HOST: $ALX_POSTGRES_HOST
       ALX_AWS_REGION: $ALX_AWS_REGION
-      ALX_AWS_PROFILE: $ALX_AWS_PROFILE 
+      ALX_AWS_PROFILE: $ALX_AWS_PROFILE
       ALX_AWS_BUCKET: $ALX_AWS_BUCKET
       ALX_JWT_SECRET: $ALX_JWT_SECRET
       URL: "http://localhost:8100"
+    networks:
+      - example-net
   backend-feed:
     image: udagram-api-feed
     volumes:
       - $HOME/.aws:/root/.aws
     environment:
       ALX_POSTGRES_USERNAME: $ALX_POSTGRES_USERNAME
-      ALX_POSTGRES_PASSWORD: $ALX_POSTGRES_PASSWORD 
+      ALX_POSTGRES_PASSWORD: $ALX_POSTGRES_PASSWORD
       ALX_POSTGRES_DB: $ALX_POSTGRES_DB
       ALX_POSTGRES_HOST: $ALX_POSTGRES_HOST
       ALX_AWS_REGION: $ALX_AWS_REGION
-      ALX_AWS_PROFILE: $ALX_AWS_PROFILE 
+      ALX_AWS_PROFILE: $ALX_AWS_PROFILE
       ALX_AWS_BUCKET: $ALX_AWS_BUCKET
       ALX_AWS_SECRET_KEY: $ALX_AWS_SECRET_KEY
       ALX_AWS_ACCESS_KEY: $ALX_AWS_ACCESS_KEY
       ALX_JWT_SECRET: $ALX_JWT_SECRET
       URL: "http://localhost:8100"
+    networks:
+      - example-net
   frontend:
     image: udagram-frontend:local
     ports:
       - "8100:80"
+    networks:
+      - example-net
+networks:
+  example-net:
+    external: true
