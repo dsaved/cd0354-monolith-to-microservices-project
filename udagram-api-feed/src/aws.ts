@@ -34,7 +34,6 @@ export async function getGetSignedUrl(key: string): Promise<string> {
     }),
   );
 
-  console.log(link);
   return link;
 }
 

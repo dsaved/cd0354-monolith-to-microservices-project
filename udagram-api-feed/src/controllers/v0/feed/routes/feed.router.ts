@@ -26,19 +26,34 @@ export function requireAuth(req: Request, res: Response, next: NextFunction) {
   });
 }
 
+export function checkOption(req: Request, res: Response, next: NextFunction) {
+  if (req.method == "OPTIONS") {
+    res.status(200);
+    res.send();
+  } else {
+    next();
+  }
+}
+
 // Get all feed items
 router.get('/', async (req: Request, res: Response) => {
-  const items = await FeedItem.findAndCountAll({ order: [['id', 'DESC']] });
-  items.rows.map(async (item) => {
-    if (item.url) {
-      item.url = await AWS.getGetSignedUrl(item.url);
+  let items = await FeedItem.findAndCountAll({ order: [['id', 'DESC']] });
+  let _items: Array<FeedItem> = [];
+
+  for (let i = 0; i < items.rows.length; i++) {
+    let item = items.rows[i];
+    _items.push(item);
+    if (_items[i].url) {
+      _items[i].url = await AWS.getGetSignedUrl(_items[i].url);
     }
-  });
-  res.send(items);
+  }
+
+  res.send({ count: items.count, rows: _items });
 });
 
 // Get a feed resource
 router.get('/:id',
+  checkOption,
   async (req: Request, res: Response) => {
     const { id } = req.params;
     const item = await FeedItem.findByPk(id);
@@ -48,15 +63,17 @@ router.get('/:id',
 // Get a signed url to put a new item in the bucket
 router.get('/signed-url/:fileName',
   requireAuth,
+  checkOption,
   async (req: Request, res: Response) => {
     const { fileName } = req.params;
-    const url:string = await AWS.getPutSignedUrl(fileName);
+    const url: string = await AWS.getPutSignedUrl(fileName);
     res.status(201).send({ url: url });
   });
 
 // Create feed with metadata
 router.post('/',
   requireAuth,
+  checkOption,
   async (req: Request, res: Response) => {
     const caption = req.body.caption;
     const fileName = req.body.url; // same as S3 key name
