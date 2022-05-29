@@ -24,7 +24,7 @@ script:
   - docker tag udagram-api-feed dsaved/udagram-api-feed:v2
   - docker tag udagram-api-user dsaved/udagram-api-user:v2
   - docker tag udagram-frontend dsaved/udagram-frontend:v2
-  - docker tag udagram-reverseproxy dsaved/udagram-reverseproxy:v2
+  - docker tag udagram-reverseproxy dsaved/udagram-reverseproxy:v3
 
 after_success:
   - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
@@ -32,4 +32,4 @@ after_success:
   - docker push dsaved/udagram-api-feed:v2
   - docker push dsaved/udagram-api-user:v2
   - docker push dsaved/udagram-frontend:v2
-  - docker push dsaved/udagram-reverseproxy:v2
+  - docker push dsaved/udagram-reverseproxy:v3
